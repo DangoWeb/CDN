@@ -1,0 +1,36 @@
+{
+	"name": "soarcdn",
+	"version": "1.0.0",
+	"description": "Cache Dango Web Solutions CMS data and built-in Soar CDN assets in your Node.js web app.",
+	"main": "cdn.js",
+	"files": [
+		"cdn.js"
+	],
+	"scripts": {
+		"start": "node cdn.js"
+	},
+	"keywords": [
+		"cache",
+		"caching",
+		"cdn",
+		"dangoweb",
+		"dangoweb-cdn",
+		"dangoweb-cms",
+		"soarcdn",
+		"soar-cdn"
+	],
+	"author": "Dango Web Solutions",
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/DangoWeb/CDN.git"
+	},
+	"bugs": {
+		"url": "https://github.com/DangoWeb/CDN/issues"
+	},
+	"publishConfig": {
+		"access": "public",
+		"tag": "latest"
+	},
+	"homepage": "https://cdn.dangoweb.com"
+}
