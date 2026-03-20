@@ -11,7 +11,7 @@ class CDN {
     };
 
     getFilePath(name) {
-        return path.resolve(path.join(this.dir, String(name).toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') + this.extension));
+        return path.resolve(path.join(this.dir, String(name).replace(/[^a-z0-9]+/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') + this.extension));
     };
 
     cache(name, object) {
