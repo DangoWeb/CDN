@@ -37,8 +37,7 @@ class CDN {
         };
     };
 
-    get(name, ttl = undefined) {
-        if ((ttl !== false) && !this.valid(name, ttl)) return false;
+    get(name) {
         try {
             return JSON.parse(fs.readFileSync(this.getFilePath(name), 'utf8'));
         } catch (e) {
