@@ -33,6 +33,7 @@ class CDN {
             if (fs.existsSync(file)) fs.unlinkSync(file);
             return true;
         } catch (e) {
+            console.error(e);
             return false;
         };
     };
@@ -41,6 +42,7 @@ class CDN {
         try {
             return JSON.parse(fs.readFileSync(this.getFilePath(name), 'utf8'));
         } catch (e) {
+            console.error(e);
             return false;
         };
     };
@@ -53,6 +55,7 @@ class CDN {
             const stats = fs.statSync(file);
             return (stats.mtimeMs + ttl * 1000) > Date.now();
         } catch (e) {
+            console.error(e);
             return false;
         };
     };
