@@ -1,7 +1,7 @@
 {
 	"name": "@dangoweb/cdn",
-	"version": "1.1.0",
-	"description": "Cache Dango Web Solutions CMS data and built-in Soar CDN assets in your Node.js web app as JSON.",
+	"version": "2.0.0",
+	"description": "Cache local files and manage lockfiles in your Node.js web app.",
 	"main": "cdn.js",
 	"files": [
 		"cdn.js"
@@ -18,7 +18,11 @@
 		"dangoweb-cdn",
 		"dangoweb-cms",
 		"soarcdn",
-		"soar-cdn"
+		"soar-cdn",
+		"lock",
+		"locks",
+		"lockfile",
+		"lockfiles"
 	],
 	"author": "Dango Web Solutions",
 	"license": "ISC",

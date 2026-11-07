@@ -1,12 +1,12 @@
 # CDN
 
-Cache Dango Web Solutions CMS data and built-in Soar CDN assets in your Node.js web app as JSON.
+Cache local files and manage lockfiles in your Node.js web app.
 
 ## Requirements
 
 - Must be using Node.js v10.12 or higher.
 
-## Usage
+## CDN Usage
 
 Include the `@dangoweb/cdn` package in your Express.js application:
 
@@ -45,6 +45,16 @@ async function startApp() {
 };
 
 startApp();
+```
+
+## Lockfile Usage
+
+Lockfiles are used to prevent concurrent access to the same resource. To use lockfiles with the CDN, you can call the `lock` method to create a lockfile, and the `unlock` method to remove it.
+
+```javascript
+const lock = await cdn.lock('resource');
+// Do something with the locked resource
+await cdn.unlock('resource');
 ```
 
 ## Tests
