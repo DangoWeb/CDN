@@ -75,6 +75,11 @@ describe('Lock Tests', () => {
     });
 
     test('Lock', async () => {
+        if (cdn.locked('cms')) cdn.unlock('cms');
         expect(cdn.lock('cms')).toBe(true);
+    });
+
+    test('All Locks', async () => {
+        expect(cdn.allLocks()).toEqual(['cms']);
     });
 });
