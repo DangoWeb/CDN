@@ -18,12 +18,12 @@ class CDN {
         return path.resolve(path.join(dir, String(name).replace(/[^a-z0-9]+/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') + extension));
     };
 
-    cache(name, object) {
+    async cache(name, object) {
         const file = this.getFilePath(name);
         try {
             const json = JSON.stringify(object);
-            fs.mkdirSync(path.dirname(file), { recursive: true });
-            fs.writeFileSync(file, json);
+            await fs.promises.mkdir(path.dirname(file), { recursive: true });
+            await fs.promises.writeFile(file, json);
             return true;
         } catch (e) {
             if (e.code === 'EEXIST') {
@@ -35,11 +35,11 @@ class CDN {
         };
     };
 
-    lock(name, content) {
+    async lock(name, content) {
         const file = this.getFilePath(name, true);
         try {
-            fs.mkdirSync(path.dirname(file), { recursive: true });
-            fs.writeFileSync(file, content || 'locked', { flag: 'wx' });
+            await fs.promises.mkdir(path.dirname(file), { recursive: true });
+            await fs.promises.writeFile(file, content || 'locked', { flag: 'wx' });
             return true;
         } catch (e) {
             if (e.code === 'EEXIST') {
@@ -51,40 +51,38 @@ class CDN {
         };
     };
 
-    delete(name) {
+    async delete(name) {
         const file = this.getFilePath(name);
         try {
-            if (fs.existsSync(file)) fs.unlinkSync(file);
+            await fs.promises.unlink(file);
             return true;
         } catch (e) {
             if (e.code === 'ENOENT') {
-                console.error(`CDN file ${file} does not exist.`);
-                return false;
+                return true;
             };
             console.error('Error in CDN.delete():', e);
             return false;
         };
     };
 
-    unlock(name) {
+    async unlock(name) {
         const file = this.getFilePath(name, true);
         try {
-            if (fs.existsSync(file)) fs.unlinkSync(file);
+            await fs.promises.unlink(file);
             return true;
         } catch (e) {
             if (e.code === 'ENOENT') {
-                console.error(`Lockfile ${file} does not exist.`);
-                return false;
+                return true;
             };
             console.error('Error in CDN.unlock():', e);
             return false;
         };
     };
 
-    get(name) {
+    async get(name) {
         const file = this.getFilePath(name);
         try {
-            const data = fs.readFileSync(file, 'utf8');
+            const data = await fs.promises.readFile(file, 'utf8');
             try {
                 return JSON.parse(data);
             } catch (e) {
@@ -100,12 +98,11 @@ class CDN {
         };
     };
 
-    valid(name, ttl) {
+    async valid(name, ttl) {
         ttl = (typeof ttl === 'number') ? ttl : this.ttl;
         const file = this.getFilePath(name);
         try {
-            if (!fs.existsSync(file)) return false;
-            const stats = fs.statSync(file);
+            const stats = await fs.promises.stat(file);
             return (stats.mtimeMs + ttl * 1000) > Date.now();
         } catch (e) {
             if (e.code === 'ENOENT') {
@@ -117,11 +114,11 @@ class CDN {
         };
     };
 
-    exists(name, isLock = false) {
+    async exists(name, isLock = false) {
         const file = this.getFilePath(name, isLock);
         try {
-            const lockFile = fs.existsSync(file);
-            if (lockFile) return true;
+            await fs.promises.access(file);
+            return true;
         } catch (e) {
             if (e.code === 'ENOENT') {
                 console.error(`${isLock ? 'Lockfile' : 'CDN file'} ${file} does not exist.`);
@@ -132,9 +129,9 @@ class CDN {
         };
     };
 
-    all() {
+    async all() {
         try {
-            const files = fs.readdirSync(this.dir);
+            const files = await fs.promises.readdir(this.dir);
             return files.filter(file => file.endsWith(this.extension)).map(file => file.replace(this.extension, ''));
         } catch (e) {
             console.error('Error in CDN.all():', e);
@@ -142,9 +139,9 @@ class CDN {
         };
     };
 
-    allLocks() {
+    async allLocks() {
         try {
-            const files = fs.readdirSync(this.lockDir);
+            const files = await fs.promises.readdir(this.lockDir);
             return files.filter(file => file.endsWith(this.lockExtension)).map(file => file.replace(this.lockExtension, ''));
         } catch (e) {
             console.error('Error in CDN.allLocks():', e);
@@ -152,55 +149,55 @@ class CDN {
         };
     };
 
-    push(name, object) {
+    async push(name, object) {
         return this.cache(name, object);
     };
 
-    set(name, object) {
+    async set(name, object) {
         return this.cache(name, object);
     };
 
-    put(name, object) {
+    async put(name, object) {
         return this.cache(name, object);
     };
 
-    update(name, object) {
+    async update(name, object) {
         return this.cache(name, object);
     };
 
-    upd(name, object) {
+    async upd(name, object) {
         return this.cache(name, object);
     };
 
-    del(name) {
+    async del(name) {
         return this.delete(name);
     };
 
-    remove(name) {
+    async remove(name) {
         return this.delete(name);
     };
 
-    rem(name) {
+    async rem(name) {
         return this.delete(name);
     };
 
-    pull(name) {
+    async pull(name) {
         return this.get(name);
     };
 
-    contents(name) {
+    async contents(name) {
         return this.get(name);
     };
 
-    locked(name) {
+    async locked(name) {
         return this.exists(name, true);
     };
 
-    unlocked(name) {
-        return !this.valid(name);
+    async unlocked(name) {
+        return !(await this.valid(name));
     };
 
-    locks() {
+    async locks() {
         return this.allLocks();
     };
 };

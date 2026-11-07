@@ -19,19 +19,19 @@ const cdn = new CDN({
 });
 
 async function cmsdata() { // Example fetching and caching CMS data
-    if (cdn.valid('cms')) return cdn.get('cms'); // Return cached CMS data if valid
+    if (await cdn.valid('cms')) return cdn.get('cms'); // Return cached CMS data if valid
     try {
         return await fetch(`...`, { }) // Given fetch function to fetch CMS data from Dango Web Solutions
             .then(res => res.json())
             .then(res => {
                 var cmsData = JSON.parse(JSON.stringify(res.data).replaceAll('.spaces', 'clients'));
                 console.log('Writing...');
-                cdn.cache('cms', cmsData); // Cache the CMS data
+                await cdn.cache('cms', cmsData); // Cache the CMS data
                 return cmsData;
             });
     } catch {
         try {
-            return cdn.get('cms'); // Fall back to cached CMS data
+            return await cdn.get('cms'); // Fall back to cached CMS data
         } catch {
             console.error('Failed to fetch CMS data and no cached data found.');
             return null;

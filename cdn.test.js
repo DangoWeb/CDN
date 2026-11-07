@@ -14,14 +14,14 @@ describe('CDN Tests', () => {
     });
 
     test('Lock', async () => {
-        expect(cdn.lock('cms')).toBe(true);
+        expect(await cdn.lock('cms')).toBe(true);
     });
 
     async function cmsdata() { // Example fetching and caching CMS data
-        if (cdn.valid('cms')) return cdn.get('cms'); // Return cached CMS data if valid
+        if (await cdn.valid('cms')) return cdn.get('cms'); // Return cached CMS data if valid
         try {
             console.log('Writing...')
-            cdn.cache('cms', { 1: 2 }); // Cache the CMS data
+            await cdn.cache('cms', { 1: 2 }); // Cache the CMS data
             return { 1: 2 };
         } catch {
             try {
@@ -39,7 +39,7 @@ describe('CDN Tests', () => {
     });
 
     test('All', async () => {
-        expect(cdn.all()).toEqual(['cms']);
+        expect(await cdn.all()).toEqual(['cms']);
     });
 
     test('Get', async () => {
@@ -48,18 +48,18 @@ describe('CDN Tests', () => {
     });
 
     test('Valid', async () => {
-        expect(cdn.valid('cms')).toBe(true);
+        expect(await cdn.valid('cms')).toBe(true);
     });
 
     test('Delete', async () => {
-        expect(cdn.del('cms')).toBe(true);
-        expect(cdn.all()).toEqual([]);
+        expect(await cdn.del('cms')).toBe(true);
+        expect(await cdn.all()).toEqual([]);
     });
 
     test('Unlock', async () => {
-        expect(cdn.unlock('cms')).toBe(true);
-        expect(cdn.locks()).toEqual([]);
-        expect(cdn.unlocked('cms')).toBe(true);
+        expect(await cdn.unlock('cms')).toBe(true);
+        expect(await cdn.locks()).toEqual([]);
+        expect(await cdn.unlocked('cms')).toBe(true);
     });
 });
 
@@ -75,11 +75,11 @@ describe('Lock Tests', () => {
     });
 
     test('Lock', async () => {
-        if (cdn.locked('cms')) cdn.unlock('cms');
-        expect(cdn.lock('cms')).toBe(true);
+        if (await cdn.locked('cms')) await cdn.unlock('cms');
+        expect(await cdn.lock('cms')).toBe(true);
     });
 
     test('All Locks', async () => {
-        expect(cdn.allLocks()).toEqual(['cms']);
+        expect(await cdn.allLocks()).toEqual(['cms']);
     });
 });
