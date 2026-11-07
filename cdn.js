@@ -15,49 +15,128 @@ class CDN {
     };
 
     cache(name, object) {
+        const file = this.getFilePath(name);
         try {
             const json = JSON.stringify(object);
-            const file = this.getFilePath(name);
             fs.mkdirSync(path.dirname(file), { recursive: true });
             fs.writeFileSync(file, json);
             return true;
         } catch (e) {
-            console.error(e);
+            if (e.code === 'EEXIST') {
+                console.error(`CDN file ${file} already exists.`);
+                return false;
+            };
+            console.error('Error in CDN.cache():', e);
             return false;
         };
     };
 
     delete(name) {
+        const file = this.getFilePath(name);
         try {
-            const file = this.getFilePath(name);
             if (fs.existsSync(file)) fs.unlinkSync(file);
             return true;
         } catch (e) {
-            console.error(e);
+            if (e.code === 'ENOENT') {
+                console.error(`CDN file ${file} does not exist.`);
+                return false;
+            };
+            console.error('Error in CDN.delete():', e);
             return false;
         };
     };
 
     get(name) {
+        const file = this.getFilePath(name);
         try {
-            return JSON.parse(fs.readFileSync(this.getFilePath(name), 'utf8'));
+            return JSON.parse(fs.readFileSync(file, 'utf8'));
         } catch (e) {
-            console.error(e);
+            if (e.code === 'ENOENT') {
+                console.error(`CDN file ${file} does not exist.`);
+                return false;
+            };
+            console.error('Error in CDN.get():', e);
             return false;
         };
     };
 
     valid(name, ttl) {
         ttl = (typeof ttl === 'number') ? ttl : this.ttl;
+        const file = this.getFilePath(name);
         try {
-            const file = this.getFilePath(name);
             if (!fs.existsSync(file)) return false;
             const stats = fs.statSync(file);
             return (stats.mtimeMs + ttl * 1000) > Date.now();
         } catch (e) {
-            console.error(e);
+            if (e.code === 'ENOENT') {
+                console.error(`CDN file ${file} does not exist.`);
+                return false;
+            };
+            console.error('Error in CDN.valid():', e);
             return false;
         };
+    };
+
+    all() {
+        try {
+            const files = fs.readdirSync(this.dir);
+            return files.filter(file => file.endsWith(this.extension)).map(file => file.replace(this.extension, ''));
+        } catch (e) {
+            console.error('Error in CDN.all():', e);
+            return [];
+        };
+    };
+
+    push(name, object) {
+        return this.cache(name, object);
+    };
+
+    set(name, object) {
+        return this.cache(name, object);
+    };
+
+    put(name, object) {
+        return this.cache(name, object);
+    };
+
+    update(name, object) {
+        return this.cache(name, object);
+    };
+
+    upd(name, object) {
+        return this.cache(name, object);
+    };
+
+    del(name) {
+        return this.delete(name);
+    };
+
+    remove(name) {
+        return this.delete(name);
+    };
+
+    rem(name) {
+        return this.delete(name);
+    };
+
+    pull(name) {
+        return this.get(name);
+    };
+
+    contents(name) {
+        return this.get(name);
+    };
+
+    exists(name) {
+        return this.valid(name);
+    };
+
+    locked(name) {
+        return this.valid(name);
+    };
+
+    unlocked(name) {
+        return !this.valid(name);
     };
 };
 
