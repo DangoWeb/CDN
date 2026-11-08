@@ -19,17 +19,17 @@ const cdn = new CDN({
 });
 
 async function cmsdata() { // Example fetching and caching CMS data
-    if (await cdn.valid('cms')) return cdn.get('cms'); // Return cached CMS data if valid
+    if (cdn.valid('cms')) return cdn.get('cms'); // Return cached CMS data if valid
     try {
         const response = await fetch(`...`, { }); // Given fetch function
         const result = await response.json();
         const cmsData = JSON.parse(JSON.stringify(result.data).replaceAll('.spaces', 'clients'));
         console.log('Writing...');
-        await cdn.cache('cms', cmsData); // Cache the CMS data
+        cdn.cache('cms', cmsData); // Cache the CMS data
         return cmsData;
     } catch {
         try {
-            return await cdn.get('cms'); // Fall back to cached CMS data
+            return cdn.get('cms'); // Fall back to cached CMS data
         } catch {
             console.error('Failed to fetch CMS data and no cached data found.');
             return null;
@@ -52,24 +52,31 @@ Lockfiles can prevent multiple processes from using the same resource at the sam
 ```javascript
 async function updateResource() {
     const resource = 'resource';
-    if (!await cdn.lock(resource)) return false;
+    if (!cdn.lock(resource)) return false;
 
     try {
         // Do something with the locked resource.
         return true;
     } finally {
-        await cdn.unlock(resource);
+        cdn.unlock(resource);
     }
 }
 
-await updateResource();
+updateResource();
 ```
 
 `lock(name, content)` writes `content` to the lockfile, or `locked` when no content is provided. `locked(name)` checks whether the lockfile exists, `locks()` lists lock names, and `unlock(name)` removes a lock. `allLocks()` is the direct equivalent of `locks()`.
 
 ## Functions
 
-All filesystem functions are asynchronous and return promises. Use `await` when calling them.
+The default `@dangoweb/cdn` entry point is synchronous. Filesystem functions return their results directly and do not return promises. For the asynchronous API, import `@dangoweb/cdn/async` instead:
+
+```javascript
+const AsyncCDN = require('@dangoweb/cdn/async');
+const asyncCdn = new AsyncCDN({ dir: './cdn/' });
+
+await asyncCdn.cache('cms', { title: 'Example' });
+```
 
 ### Constructor
 
@@ -97,7 +104,7 @@ const lockPath = cdn.getFilePath('cms', true);
 Writes an object as JSON and returns `true` when it succeeds.
 
 ```javascript
-await cdn.cache('cms', { title: 'Example' });
+cdn.cache('cms', { title: 'Example' });
 ```
 
 ### `get(name)`
@@ -105,7 +112,7 @@ await cdn.cache('cms', { title: 'Example' });
 Reads a cache file, parsing JSON when possible. It returns raw text for non-JSON files and `false` when the file does not exist.
 
 ```javascript
-const cms = await cdn.get('cms');
+const cms = cdn.get('cms');
 ```
 
 ### `delete(name)`
@@ -113,7 +120,7 @@ const cms = await cdn.get('cms');
 Removes a cache file. It returns `true` when the file is removed or already absent.
 
 ```javascript
-await cdn.delete('cms');
+cdn.delete('cms');
 ```
 
 ### `valid(name, ttl)`
@@ -121,9 +128,7 @@ await cdn.delete('cms');
 Checks whether a cache file exists and was modified within `ttl` seconds. The configured `ttl` is used when no value is supplied.
 
 ```javascript
-if (await cdn.valid('cms', 3600)) {
-    const cms = await cdn.get('cms');
-}
+if (cdn.valid('cms', 3600)) const cms = cdn.get('cms');
 ```
 
 ### `exists(name, isLock)`
@@ -131,8 +136,8 @@ if (await cdn.valid('cms', 3600)) {
 Checks whether a cache or lockfile exists.
 
 ```javascript
-const hasCache = await cdn.exists('cms');
-const hasLock = await cdn.exists('cms', true);
+const hasCache = cdn.exists('cms');
+const hasLock = cdn.exists('cms', true);
 ```
 
 ### `all()`
@@ -140,7 +145,7 @@ const hasLock = await cdn.exists('cms', true);
 Returns the names of all cache files in the configured cache directory.
 
 ```javascript
-const names = await cdn.all();
+const names = cdn.all();
 ```
 
 ### `lock(name, content)`
@@ -148,7 +153,7 @@ const names = await cdn.all();
 Creates a lockfile atomically. It returns `false` if the lock already exists.
 
 ```javascript
-const acquired = await cdn.lock('cms', 'Updating CMS');
+const acquired = cdn.lock('cms', 'Updating CMS');
 ```
 
 ### `unlock(name)`
@@ -156,7 +161,7 @@ const acquired = await cdn.lock('cms', 'Updating CMS');
 Removes a lockfile and returns `true` when it is removed or already absent.
 
 ```javascript
-await cdn.unlock('cms');
+cdn.unlock('cms');
 ```
 
 ### `allLocks()`
@@ -164,7 +169,7 @@ await cdn.unlock('cms');
 Returns the names of all lockfiles in the configured lock directory.
 
 ```javascript
-const activeLocks = await cdn.allLocks();
+const activeLocks = cdn.allLocks();
 ```
 
 ### `locked(name)`
@@ -172,7 +177,7 @@ const activeLocks = await cdn.allLocks();
 Checks whether a named lockfile exists.
 
 ```javascript
-if (await cdn.locked('cms')) console.log('CMS is locked');
+if (cdn.locked('cms')) console.log('CMS is locked');
 ```
 
 ### `unlocked(name)`
@@ -180,7 +185,7 @@ if (await cdn.locked('cms')) console.log('CMS is locked');
 Returns `true` when the named cache is missing or expired.
 
 ```javascript
-if (await cdn.unlocked('cms')) console.log('Refresh the CMS cache');
+if (cdn.unlocked('cms')) console.log('Refresh the CMS cache');
 ```
 
 ### `locks()`
@@ -188,7 +193,7 @@ if (await cdn.unlocked('cms')) console.log('Refresh the CMS cache');
 Alias for `allLocks()`.
 
 ```javascript
-const activeLocks = await cdn.locks();
+const activeLocks = cdn.locks();
 ```
 
 ### Cache-writing aliases
@@ -196,11 +201,11 @@ const activeLocks = await cdn.locks();
 `push`, `set`, `put`, `update`, and `upd` are aliases for `cache`.
 
 ```javascript
-await cdn.push('cms', data);
-await cdn.set('settings', settings);
-await cdn.put('profile', profile);
-await cdn.update('navigation', navigation);
-await cdn.upd('summary', summary);
+cdn.push('cms', data);
+cdn.set('settings', settings);
+cdn.put('profile', profile);
+cdn.update('navigation', navigation);
+cdn.upd('summary', summary);
 ```
 
 ### Cache-deletion aliases
@@ -208,9 +213,9 @@ await cdn.upd('summary', summary);
 `del`, `remove`, and `rem` are aliases for `delete`.
 
 ```javascript
-await cdn.del('cms');
-await cdn.remove('settings');
-await cdn.rem('profile');
+cdn.del('cms');
+cdn.remove('settings');
+cdn.rem('profile');
 ```
 
 ### Cache-reading aliases
@@ -218,11 +223,9 @@ await cdn.rem('profile');
 `pull` and `contents` are aliases for `get`.
 
 ```javascript
-const cms = await cdn.pull('cms');
-const settings = await cdn.contents('settings');
+const cms = cdn.pull('cms');
+const settings = cdn.contents('settings');
 ```
-
-
 
 ## Tests
 

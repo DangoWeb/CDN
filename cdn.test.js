@@ -53,58 +53,58 @@ describe('CDN', () => {
     });
 
     test('caches and retrieves JSON data', async () => {
-        expect(await cdn.cache('cms', { version: 2 })).toBe(true);
-        expect(await cdn.get('cms')).toEqual({ version: 2 });
-        expect(await cdn.exists('cms')).toBe(true);
+        expect(cdn.cache('cms', { version: 2 })).toBe(true);
+        expect(cdn.get('cms')).toEqual({ version: 2 });
+        expect(cdn.exists('cms')).toBe(true);
     });
 
     test('retrieves non-JSON content as a string', async () => {
         await fs.promises.mkdir(cdn.dir, { recursive: true });
         await fs.promises.writeFile(cdn.getFilePath('text'), 'plain text');
 
-        expect(await cdn.get('text')).toBe('plain text');
+        expect(cdn.get('text')).toBe('plain text');
     });
 
     test('returns false for missing cache files', async () => {
-        expect(await cdn.get('missing')).toBe(false);
-        expect(await cdn.valid('missing')).toBe(false);
-        expect(await cdn.exists('missing')).toBe(false);
+        expect(cdn.get('missing')).toBe(false);
+        expect(cdn.valid('missing')).toBe(false);
+        expect(cdn.exists('missing')).toBe(false);
     });
 
     test('checks cache validity using the default and supplied TTL', async () => {
-        await cdn.cache('fresh', { ok: true });
+        cdn.cache('fresh', { ok: true });
 
-        expect(await cdn.valid('fresh')).toBe(true);
-        expect(await cdn.valid('fresh', -1)).toBe(false);
+        expect(cdn.valid('fresh')).toBe(true);
+        expect(cdn.valid('fresh', -1)).toBe(false);
     });
 
     test('lists and deletes cache files', async () => {
-        await cdn.cache('first', 1);
-        await cdn.cache('second', 2);
+        cdn.cache('first', 1);
+        cdn.cache('second', 2);
         await fs.promises.writeFile(path.join(cdn.dir, 'ignored.txt'), 'ignored');
 
-        expect((await cdn.all()).sort()).toEqual(['first', 'second']);
-        expect(await cdn.delete('first')).toBe(true);
-        expect(await cdn.all()).toEqual(['second']);
-        expect(await cdn.delete('missing')).toBe(true);
+        expect((cdn.all()).sort()).toEqual(['first', 'second']);
+        expect(cdn.delete('first')).toBe(true);
+        expect(cdn.all()).toEqual(['second']);
+        expect(cdn.delete('missing')).toBe(true);
     });
 
     test('creates, detects, lists, and removes lock files', async () => {
-        expect(await cdn.lock('resource', 'busy')).toBe(true);
-        expect(await cdn.locked('resource')).toBe(true);
-        expect(await cdn.exists('resource', true)).toBe(true);
-        expect(await cdn.lock('resource')).toBe(false);
-        expect(await cdn.allLocks()).toEqual(['resource']);
+        expect(cdn.lock('resource', 'busy')).toBe(true);
+        expect(cdn.locked('resource')).toBe(true);
+        expect(cdn.exists('resource', true)).toBe(true);
+        expect(cdn.lock('resource')).toBe(false);
+        expect(cdn.allLocks()).toEqual(['resource']);
         expect(await fs.promises.readFile(cdn.getFilePath('resource', true), 'utf8')).toBe('busy');
 
-        expect(await cdn.unlock('resource')).toBe(true);
-        expect(await cdn.locked('resource')).toBe(false);
-        expect(await cdn.locks()).toEqual([]);
-        expect(await cdn.unlock('resource')).toBe(true);
+        expect(cdn.unlock('resource')).toBe(true);
+        expect(cdn.locked('resource')).toBe(false);
+        expect(cdn.locks()).toEqual([]);
+        expect(cdn.unlock('resource')).toBe(true);
     });
 
     test('reports an absent cache as unlocked', async () => {
-        expect(await cdn.unlocked('resource')).toBe(true);
+        expect(cdn.unlocked('resource')).toBe(true);
     });
 
     test.each([
@@ -114,8 +114,8 @@ describe('CDN', () => {
         ['update', 'update-value'],
         ['upd', 'upd-value'],
     ])('%s aliases cache', async (method, value) => {
-        expect(await cdn[method](method, value)).toBe(true);
-        expect(await cdn.get(method)).toBe(value);
+        expect(cdn[method](method, value)).toBe(true);
+        expect(cdn.get(method)).toBe(value);
     });
 
     test.each([
@@ -123,16 +123,16 @@ describe('CDN', () => {
         ['remove', 'remove-value'],
         ['rem', 'rem-value'],
     ])('%s aliases delete', async (method, value) => {
-        await cdn.cache(method, value);
-        expect(await cdn[method](method)).toBe(true);
-        expect(await cdn.exists(method)).toBe(false);
+        cdn.cache(method, value);
+        expect(cdn[method](method)).toBe(true);
+        expect(cdn.exists(method)).toBe(false);
     });
 
     test.each([
         ['pull', 'pull-value'],
         ['contents', 'contents-value'],
     ])('%s aliases get', async (method, value) => {
-        await cdn.cache(method, value);
-        expect(await cdn[method](method)).toBe(value);
+        cdn.cache(method, value);
+        expect(cdn[method](method)).toBe(value);
     });
 });

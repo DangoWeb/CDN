@@ -1,11 +1,18 @@
 {
 	"name": "@dangoweb/cdn",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "Cache local files and manage lockfiles in your Node.js web app.",
 	"main": "cdn.js",
 	"files": [
-		"cdn.js"
+		"cdn.js",
+		"async.js"
 	],
+	"exports": {
+		".": "./cdn.js",
+		"./package.json": "./package.json",
+		"./async": "./async.js",
+		"./async.js": "./async.js"
+	},
 	"scripts": {
 		"start": "node cdn.js",
 		"test": "npx jest"
